@@ -1,2 +1,0 @@
-check if libraries installed are needed
-change README
