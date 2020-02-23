@@ -29,8 +29,6 @@ def get_distance(coord1, coord2):
     (in meters)
     """
 
-    #print(coord1, coord1, 'alsh/dflkawh/flqhweufh')
-    #print(type(coord1), type(coord2), type(coord1[0]), type(coord1[1]), type(coord2[0]), type(coord2[1]))
     return geopy.distance.great_circle(coord1, coord2).meters
 
 

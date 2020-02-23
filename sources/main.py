@@ -26,31 +26,50 @@ def main():
     coord0 = latitude, longitude
 
     stop_flag = False
+    movie_distance_set = set()
     movie_distance_list = []
 
     for location in year_location_movie_dict[year]:
         if country in location:
-            if stop_flag:
-                break
+            try:
+                if stop_flag:
+                    break
 
-            coord1 = geodesic.get_latitude_longtitude(location)
+                coord1 = geodesic.get_latitude_longtitude(location)
+                coord1 = coord1.latitude, coord1.longitude
 
-            if time.time() - start_time > 170: # almost three minutes
-                stop_flag = True
-                break
-
-            for movie in year_location_movie_dict[year][location]:
-                if time.time() - start_time > 170:
+                if time.time() - start_time > 120: # two minutes
                     stop_flag = True
                     break
-                movie_distance_list = movie, \
-                    geodesic.get_distance(coord0, coord1)
-    
-    movie_distance_list.sort(key=lambda item: item[-1])
-    print(movie_distance_list[: 10])
-    #map_builder.label_layer(movie_distance_list[: 10])
 
-    #map_builder.build_map()
+                for movie in year_location_movie_dict[year][location]:
+                    if time.time() - start_time > 120:
+                        stop_flag = True
+                        break
+
+                    movie_distance_set.add((movie,
+                        geodesic.get_distance(coord0, coord1),
+                        coord1))
+            except:
+                continue
+
+    if len(movie_distance_set) == 0:
+        print('You\'ve got no movies in this year and country. ' +
+            'Try another input.')
+        exit(0)
+
+    movie_distance_list = list(movie_distance_set)
+    movie_distance_list.sort(key=lambda item: item[1])
+
+    mp = map_builder.create_map()
+    movie_layer = map_builder.build_movie_layer(coord0,
+        movie_distance_list[: 10])
+    mp = map_builder.build_map(mp, [movie_layer])
+
+    out_path = os.path.join(home, os.path.join(home,
+        '..\\maps\\' + str(year) + '_movies_map.html'))
+    map_builder.save_map(mp, out_path)
+    # map_builder.save_map(mp, str(year) + '_movies_map.html')
     # The end of the main part--------------------------------------------
 
     print("Finished. Please have a look at the map \"" + str(year) +
